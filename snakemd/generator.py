@@ -283,8 +283,25 @@ class InlineText:
         return self
 
 
-
 class CheckBox(InlineText):
+        """
+        A checkable box, based of InlineText.
+        Supports all formats available via InlineText (eg. url, bold, italics, etc.) 
+
+        :param str text: the inline text to render
+        :param str url: the link associated with the inline text
+        :param bool bold: the bold state of the inline text; 
+            set to True to render bold inline text (i.e., True -> **bold**)
+        :param bool italics: the italics state of the inline text; 
+            set to True to render inline text in italics (i.e., True -> *italics*)
+        :param bool code: the italics state of the inline text;
+            set to True to render inline text as code (i.e., True -> `code`)
+        :param bool image: the image state of the inline text;
+            set to True to render inline text as an image;
+            must include url parameter to render
+        :param bool checked: the checkbox state, checked or not;
+            set to True to render checkbox as checked
+        """
         def __init__(
             self,
             text: str,
@@ -767,11 +784,13 @@ class MDList(Element):
 class MDCheckList(MDList):
     """
     A markdown CheckBox list has boxes that can be clicked.
+    
+    .. versionadded:: 0.10.0
 
     :param Iterable[Union[str, InlineText, Paragraph, MDList]] items: 
         a "list" of objects to be rendered as a Checkbox list
     :param bool checked: the state of the checkbox;
-        set to True to render an checked box (i.e., True -> 1. item)
+        set to True to render a checked box (i.e., True -> - [x] item)
     """
     def __init__(self,  items: Iterable[Union[str, InlineText, Paragraph, MDList]], checked: bool=False) -> None:
         super().__init__(items, False)
@@ -780,7 +799,7 @@ class MDCheckList(MDList):
     def render(self) -> str:
         """
         Renders the markdown Check Box list according to the settings provided.
-        For example, if the the ordered flag is set, an ordered list
+        For example, if the the checked flag is set, a checked list
         will be rendered in markdown. 
 
         :return: the list as a markdown string
@@ -796,6 +815,8 @@ class MDCheckList(MDList):
                 output.append(f"{self._space}- [{checked_str}] {item}")
 
         return "\n".join(output)
+    
+
 class TableOfContents(Element):
     """
     A Table of Contents is an element containing an ordered list
@@ -1168,6 +1189,24 @@ class Document:
         self._contents.append(md_list)
         logger.debug(f"Added unordered list to document\n{md_list}")
         return md_list
+
+    def add_checklist(self, items: Iterable[str]) -> MDCheckList:
+        """
+        A convenience method which adds a simple checklist to the document. 
+
+        .. code-block:: Python
+
+            doc.add_checklist(["Okabe", "Mayuri", "Kurisu"])
+
+        .. versionadded:: 0.10.0
+
+        :param Iterable[str] items: a "list" of strings
+        :return: the MDCheckList added to this Document
+        """
+        md_checklist = MDCheckList([InlineText(item) for item in items], checked=False)
+        self._contents.append(md_checklist)
+        logger.debug(f"Added checklist to document\n{md_checklist}")
+        return md_checklist
 
     def add_table(
         self,
