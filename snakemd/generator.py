@@ -1067,13 +1067,14 @@ class Document:
     def __str__(self):
         return self.render()
 
-    def render(self) -> str:
+    def render(self, bottom_padding: int = 2) -> str:
         """
         Renders the markdown document from a list of elements.
-
+        
+        :param int bottom_padding: Number of line breaks below each element
         :return: the document as a markdown string
         """
-        return "\n\n".join(str(element) for element in self._contents)
+        return str("\n" * bottom_padding).join(str(element) for element in self._contents)
 
     def check_for_errors(self) -> None:
         """
